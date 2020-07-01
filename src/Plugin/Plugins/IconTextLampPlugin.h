@@ -50,8 +50,13 @@
 #include <BitmapWidget.h>
 #include <TextWidget.h>
 #include <LampWidget.h>
-#include <SPIFFS.h>
-
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+#else
+  #include <SPIFFS.h>
+#endif 
 /******************************************************************************
  * Macros
  *****************************************************************************/

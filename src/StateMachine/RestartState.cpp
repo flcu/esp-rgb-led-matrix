@@ -41,7 +41,13 @@
 
 #include <Logging.h>
 #include <Util.h>
-#include <SPIFFS.h>
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+#else
+  #include <SPIFFS.h>
+#endif 
 #include <ESPmDNS.h>
 
 /******************************************************************************

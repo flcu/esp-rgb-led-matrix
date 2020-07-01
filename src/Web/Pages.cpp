@@ -44,7 +44,13 @@
 
 #include <WiFi.h>
 #include <Esp.h>
-#include <SPIFFS.h>
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+#else
+  #include <SPIFFS.h>
+#endif 
 #include <Update.h>
 #include <Logging.h>
 #include <Util.h>

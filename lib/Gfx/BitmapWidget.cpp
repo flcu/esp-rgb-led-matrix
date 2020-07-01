@@ -36,7 +36,13 @@
 
 #ifndef NATIVE
 
-#include <SPIFFS.h>
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+#else
+  #include <SPIFFS.h>
+#endif 
 #include <NeoPixelBus.h>
 #include <Color.h>
 #include <Logging.h>

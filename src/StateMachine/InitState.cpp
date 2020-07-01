@@ -36,8 +36,13 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <SPIFFS.h>
-
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+#else
+  #include <SPIFFS.h>
+#endif 
 #include "Board.h"
 #include "ButtonDrv.h"
 #include "LedMatrix.h"
@@ -131,6 +136,28 @@ void InitState::entry(StateMachine& sm)
         LOG_FATAL("Couldn't mount the filesystem.");
         isError = true;
     }
+    #if USE_LittleFS
+    else if (false == SPIFFS.mkdir("/configuration"))
+    {
+        LOG_FATAL("Couldn't create directory: /configuration.");
+        isError = true;
+    }
+    else if (false == SPIFFS.mkdir("/tmp"))
+    {
+        LOG_FATAL("Couldn't create directory: /tmp.");
+        isError = true;
+    }
+    else if (false == SPIFFS.mkdir("/style"))
+    {
+        LOG_FATAL("Couldn't create directory: /style.");
+        isError = true;
+    }
+       else if (false == SPIFFS.mkdir("/js"))
+    {
+        LOG_FATAL("Couldn't create directory: /js.");
+        isError = true;
+    }
+    #endif
     /* Start LED matrix */
     else if (false == LedMatrix::getInstance().begin())
     {

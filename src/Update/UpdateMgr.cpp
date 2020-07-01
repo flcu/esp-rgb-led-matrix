@@ -34,7 +34,13 @@
  *****************************************************************************/
 #include "UpdateMgr.h"
 
-#include <SPIFFS.h>
+#include <FS.h>
+#ifdef USE_LittleFS
+  #define SPIFFS LITTLEFS
+  #include <LITTLEFS.h> 
+#else
+  #include <SPIFFS.h>
+#endif 
 #include <Logging.h>
 #include <Esp.h>
 

@@ -40,10 +40,10 @@
 #include <FS.h>
 #ifdef USE_LittleFS
   #define SPIFFS LITTLEFS
-  #include <LITTLEFS.h> 
+  #include <LITTLEFS.h>
 #else
   #include <SPIFFS.h>
-#endif 
+#endif
 
 /******************************************************************************
  * Compiler Switches
@@ -54,14 +54,14 @@
  *****************************************************************************/
 
 /* Structure of response-payload for requesting D_Y_10_1
- * 
- * <data><code>ok</code><D_Y_10_1>XYZ</D_Y_10_1></data> 
- * 
+ *
+ * <data><code>ok</code><D_Y_10_1>XYZ</D_Y_10_1></data>
+ *
  * <data><code>ok</code><D_Y_10_1>  = 31 bytes
  * XYZ                              = 3 byte (relevant data)
  * </D_Y_10_1></data>               = 18 bytes
  */
- 
+
 /* Startindex of relevant data. */
 #define START_INDEX_OF_RELEVANT_DATA (31U)
 
@@ -84,7 +84,7 @@
 const char* GruenbeckPlugin::IMAGE_PATH     = "/images/gruenbeck.bmp";
 
 /* Initialize configuration path. */
-const char* GruenbeckPlugin::CONFIG_PATH    = "/configuration/";
+const char* GruenbeckPlugin::CONFIG_PATH    = "/configuration";
 
 /******************************************************************************
  * Public Methods
@@ -120,14 +120,14 @@ void GruenbeckPlugin::active(IGfx& gfx)
             m_textWidget.move(0, 1);
 
             setText("\\calign?");
-         
+
             m_textCanvas->update(gfx);
         }
     }
 
     requestNewData();
     m_requestDataTimer.start(GruenbeckPlugin::UPDATE_PERIOD);
-        
+
     return;
 }
 
@@ -173,7 +173,7 @@ void GruenbeckPlugin::start()
 {
     String configPath = CONFIG_PATH;
 
-    m_configurationFilename = configPath + getUID() + ".json";
+    m_configurationFilename = configPath + "/" + getUID() + ".json";
 
     if (false != loadOrGenerateConfigFile())
     {
@@ -185,7 +185,7 @@ void GruenbeckPlugin::start()
     return;
 }
 
-void GruenbeckPlugin::stop() 
+void GruenbeckPlugin::stop()
 {
     if (false != SPIFFS.remove(m_configurationFilename))
     {
@@ -232,7 +232,7 @@ void GruenbeckPlugin::registerResponseCallback()
         const char* payload         = reinterpret_cast<const char*>(rsp.getPayload(payloadSize));
         size_t      payloadIndex    = 0U;
         String      payloadString;
-       
+
         while(payloadSize > payloadIndex)
         {
             payloadString += payload[payloadIndex];
@@ -258,9 +258,9 @@ bool GruenbeckPlugin::loadOrGenerateConfigFile()
 
         /* If not  we are on the very first instalation of the plugin
            First we create the directory. */
-        if (false == SPIFFS.mkdir(m_configurationFilename))
+        if (false == SPIFFS.mkdir(CONFIG_PATH))
         {
-            LOG_WARNING("Couldn't create directory: %s", m_configurationFilename);
+            LOG_WARNING("Couldn't create directory: %s", CONFIG_PATH);
             status = false;
         }
         else
@@ -291,7 +291,7 @@ bool GruenbeckPlugin::loadOrGenerateConfigFile()
             JsonObject obj;
             String ipAddress;
             String file_content = m_fd.readString();
-            
+
             deserializeJson(jsonDoc, file_content);
 
             obj = jsonDoc.as<JsonObject>();

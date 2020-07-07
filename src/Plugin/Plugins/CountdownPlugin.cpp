@@ -41,10 +41,10 @@
 #include <FS.h>
 #ifdef USE_LittleFS
   #define SPIFFS LITTLEFS
-  #include <LITTLEFS.h> 
+  #include <LITTLEFS.h>
 #else
   #include <SPIFFS.h>
-#endif 
+#endif
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -69,7 +69,7 @@
 const char* CountdownPlugin::IMAGE_PATH     = "/images/countdown.bmp";
 
 /* Initialize configuration path. */
-const char* CountdownPlugin::CONFIG_PATH    = "/configuration/";
+const char* CountdownPlugin::CONFIG_PATH    = "/configuration";
 
 /******************************************************************************
  * Public Methods
@@ -157,7 +157,7 @@ void CountdownPlugin::start()
 {
     String configPath = CONFIG_PATH;
 
-    m_configurationFilename = configPath + getUID() + ".json";
+    m_configurationFilename = configPath + "/" + getUID() + ".json";
 
     if (false == loadOrGenerateConfigFile())
     {
@@ -172,7 +172,7 @@ void CountdownPlugin::start()
     return;
 }
 
-void CountdownPlugin::stop() 
+void CountdownPlugin::stop()
 {
     if (false != SPIFFS.remove(m_configurationFilename))
     {
@@ -205,9 +205,9 @@ bool CountdownPlugin::loadOrGenerateConfigFile()
 
         /* If not we are on the very first installation of the plugin
            First we create the directory. */
-        if (false == SPIFFS.mkdir(m_configurationFilename))
+        if (false == SPIFFS.mkdir(CONFIG_PATH))
         {
-            LOG_WARNING("Couldn't create directory: %s", m_configurationFilename);
+            LOG_WARNING("Couldn't create directory: %s", CONFIG_PATH);
             status = false;
         }
         else
@@ -246,7 +246,7 @@ bool CountdownPlugin::loadOrGenerateConfigFile()
 
             deserializeJson(jsonDoc, file_content);
             obj = jsonDoc.as<JsonObject>();
-            
+
             m_targetDate.day = obj["day"];
             m_targetDate.month = obj["month"];
             m_targetDate.year = obj["year"];
@@ -256,7 +256,7 @@ bool CountdownPlugin::loadOrGenerateConfigFile()
 
             m_targetDateInformation.plural = description_pl;
             m_targetDateInformation.singular = description_sg;
-            
+
             m_fd.close();
         }
     }
@@ -310,7 +310,7 @@ void CountdownPlugin::calculateDifferenceInDays()
         {
             m_remainingDays = "ELAPSED!";
         }
-        
+
         setText(m_remainingDays);
 
         m_isUpdateAvailable = true;
@@ -318,32 +318,32 @@ void CountdownPlugin::calculateDifferenceInDays()
 }
 
 uint16_t CountdownPlugin::countLeapYears(CountdownPlugin::DateDMY date)
-{ 
-    uint16_t years = date.year; 
-    
+{
+    uint16_t years = date.year;
+
     /* Check if the current year needs to be considered for the count of leap years or not. */
-    if (date.month <= 2U) 
+    if (date.month <= 2U)
     {
         --years;
-    } 
+    }
 
     /* An year is a leap year if it is a multiple of 4, multiple of 400 and not a multiple of 100. */
-    return years / 4U - years / 100U + years / 400U; 
-} 
+    return years / 4U - years / 100U + years / 400U;
+}
 
 uint32_t CountdownPlugin::dateToDays(CountdownPlugin::DateDMY date)
 {
-    const uint8_t   monthDays[12]   = {31U, 28U, 31U, 30U, 31U, 30U, 31U, 31U, 30U, 31U, 30U, 31U}; 
+    const uint8_t   monthDays[12]   = {31U, 28U, 31U, 30U, 31U, 30U, 31U, 31U, 30U, 31U, 30U, 31U};
     uint32_t        dateInDays      = 0U;
     uint8_t         i               = 0U;
 
     dateInDays = date.year * 365U + date.day;
-    
-    for (i = 0U; i < (date.month - 1U); i++) 
+
+    for (i = 0U; i < (date.month - 1U); i++)
     {
-        dateInDays += monthDays[i]; 
+        dateInDays += monthDays[i];
     }
-    
+
     dateInDays += countLeapYears(date);
 
     return dateInDays;

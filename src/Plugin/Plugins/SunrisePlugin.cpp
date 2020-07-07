@@ -43,10 +43,10 @@
 #include <FS.h>
 #ifdef USE_LittleFS
   #define SPIFFS LITTLEFS
-  #include <LITTLEFS.h> 
+  #include <LITTLEFS.h>
 #else
   #include <SPIFFS.h>
-#endif 
+#endif
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -71,7 +71,7 @@
 const char* SunrisePlugin::IMAGE_PATH     = "/images/sunrise.bmp";
 
 /* Initialize configuration path. */
-const char* SunrisePlugin::CONFIG_PATH    = "/configuration/";
+const char* SunrisePlugin::CONFIG_PATH    = "/configuration";
 
 /******************************************************************************
  * Public Methods
@@ -107,7 +107,7 @@ void SunrisePlugin::active(IGfx& gfx)
             m_textWidget.move(0, 1);
 
             setText("\\calign?");
-         
+
             m_textCanvas->update(gfx);
         }
     }
@@ -150,7 +150,7 @@ void SunrisePlugin::start()
 {
     String configPath = CONFIG_PATH;
 
-    m_configurationFilename = configPath + getUID() + ".json";
+    m_configurationFilename = configPath + "/" + getUID() + ".json";
 
     if (false != loadOrGenerateConfigFile())
     {
@@ -162,7 +162,7 @@ void SunrisePlugin::start()
     return;
 }
 
-void SunrisePlugin::stop() 
+void SunrisePlugin::stop()
 {
     if (false != SPIFFS.remove(m_configurationFilename))
     {
@@ -255,7 +255,7 @@ String SunrisePlugin::addCurrentTimezoneValues(String dateTimeString)
         Settings::getInstance().close();
     }
 
-    strptime(dateTimeString.c_str(), "%Y-%m-%dT%H:%M:%S" ,&timeInfo); 
+    strptime(dateTimeString.c_str(), "%Y-%m-%dT%H:%M:%S" ,&timeInfo);
     timeInfo.tm_hour += gmtOffset /3600;
     timeInfo.tm_hour += isDaylightSaving;
     timeInfo.tm_hour += isPM * 12;
@@ -280,9 +280,9 @@ bool SunrisePlugin::loadOrGenerateConfigFile()
 
         /* If not  we are on the very first instalation of the plugin
            First we create the directory. */
-        if (false == SPIFFS.mkdir(m_configurationFilename))
+        if (false == SPIFFS.mkdir(CONFIG_PATH))
         {
-            LOG_WARNING("Couldn't create directory: %s", m_configurationFilename);
+            LOG_WARNING("Couldn't create directory: %s", m_configurationFilename.c_str());
             status = false;
         }
         else
@@ -322,10 +322,10 @@ bool SunrisePlugin::loadOrGenerateConfigFile()
             deserializeJson(jsonDoc, file_content);
 
             obj = jsonDoc.as<JsonObject>();
-            
+
             longitude = obj["longitude"].as<String>();
             latitude = obj["latitude"].as<String>();
-            
+
             m_url = "http://api.sunrise-sunset.org/json?lat="+ latitude + "&lng=" + longitude + "&formatted=0";
 
             m_fd.close();

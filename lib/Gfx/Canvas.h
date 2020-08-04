@@ -197,6 +197,32 @@ public:
     }
 
     /**
+     * Update from the canvas buffer with the given graphics interface.
+     * Note, only useable in case the canvas is buffered.
+     *
+     * @param[in] gfx   Graphics interface
+     */
+    void updateFromBuffer(IGfx& gfx)
+    {
+        /* In a buffered canvas, only the buffer into the underlying canvas. */
+        if (nullptr != m_buffer)
+        {
+            int16_t x = 0;
+            int16_t y = 0;
+
+            for(y = 0; y < getHeight(); ++y)
+            {
+                for(x = 0; x < getWidth(); ++x)
+                {
+                    gfx.drawPixel(x, y, m_buffer[x + y * getWidth()]);
+                }
+            }
+        }
+
+        return;
+    }
+
+    /**
      * Get pixel color at given position.
      * Note, only useable in case the canvas is buffered.
      *
@@ -293,6 +319,44 @@ private:
             else if (nullptr != m_buffer)
             {
                 m_buffer[x + y * getWidth()] = color;
+            }
+            /* Skip drawing */
+            else
+            {
+                ;
+            }
+        }
+
+        return;
+    }
+
+    /**
+     * Dim color to black.
+     * A dim ratio of 255 means no change.
+     * 
+     * Note, the base colors may be destroyed, depends on the color type.
+     *
+     * @param[in] x     x-coordinate
+     * @param[in] y     y-coordinate
+     * @param[in] ratio Dim ration [0; 255]
+     */
+    void dimPixel(int16_t x, int16_t y, uint8_t ratio)
+    {
+        /* Don't draw outside the canvas. */
+        if ((0 <= x) &&
+            (getWidth() > x) &&
+            (0 <= y) &&
+            (getHeight() > y))
+        {
+            /* Draw on the real underlying canvas? */
+            if (nullptr != m_gfx)
+            {
+                m_gfx->dimPixel(m_posX + x, m_posY + y, ratio);
+            }
+            /* Draw into buffer? */
+            else if (nullptr != m_buffer)
+            {
+                m_buffer[x + y * getWidth()].setIntensity(ratio);
             }
             /* Skip drawing */
             else

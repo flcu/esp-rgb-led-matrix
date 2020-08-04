@@ -230,6 +230,29 @@ public:
     }
 
     /**
+     * Dim color to black.
+     * A dim ratio of 255 means no change.
+     * 
+     * Note, the base colors may be destroyed, depends on the color type.
+     *
+     * @param[in] x     x-coordinate
+     * @param[in] y     y-coordinate
+     * @param[in] ratio Dim ration [0; 255]
+     */
+    void dimPixel(int16_t x, int16_t y, uint8_t ratio)
+    {
+        /* Out of bounds check */
+        TEST_ASSERT_GREATER_OR_EQUAL_INT16(0, x);
+        TEST_ASSERT_GREATER_OR_EQUAL_INT16(0, y);
+        TEST_ASSERT_LESS_OR_EQUAL_INT16(WIDTH, x);
+        TEST_ASSERT_LESS_OR_EQUAL_INT16(HEIGHT, y);
+
+        m_buffer[x + y * WIDTH].setIntensity(ratio);
+
+        return;
+    }
+
+    /**
      * Get display buffer.
      *
      * @return Display buffer
@@ -1405,6 +1428,21 @@ static void testColor()
     /* Check conversion routines of ColorDef */
     TEST_ASSERT_EQUAL_UINT16(0x0821u, ColorDef::convert888To565(0x00080408U));
     TEST_ASSERT_EQUAL_UINT32(0x00080408u, ColorDef::convert565To888(0x0821U));
+
+    /* Dim color 25% darker */
+    myColorA = 0xc8c8c8u;
+    myColorA.setIntensity(192);
+    TEST_ASSERT_EQUAL_UINT8(0x96u, myColorA.getRed());
+    TEST_ASSERT_EQUAL_UINT8(0x96u, myColorA.getGreen());
+    TEST_ASSERT_EQUAL_UINT8(0x96u, myColorA.getBlue());
+
+    /* Dim a color by 0%, which means no change.
+     * And additional check non-destructive base colors.
+     */
+    myColorA.setIntensity(255);
+    TEST_ASSERT_EQUAL_UINT8(0xc8u, myColorA.getRed());
+    TEST_ASSERT_EQUAL_UINT8(0xc8u, myColorA.getGreen());
+    TEST_ASSERT_EQUAL_UINT8(0xc8u, myColorA.getBlue());
 
     return;
 }

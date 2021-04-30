@@ -45,8 +45,9 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IGfx.hpp>
-#include <NeoPixelBrightnessBus.h>
 #include <ColorDef.hpp>
+#include <SPI.h>
+#include <TFT_eSPI.h>       // Hardware-specific library
 
 #include "Board.h"
 
@@ -149,7 +150,7 @@ public:
 private:
 
     /** Pixel representation of the LED matrix */
-    NeoPixelBrightnessBus<NeoGrbFeature, Neo800KbpsMethod>  m_strip;
+    TFT_eSPI                                                m_tft;
 
     /** Panel topology, used to map coordinates to the framebuffer. */
     NeoTopology<ColumnMajorAlternatingLayout>               m_topo;

@@ -48,6 +48,7 @@
 #include <ColorDef.hpp>
 #include <SPI.h>
 #include <TFT_eSPI.h>       // Hardware-specific library
+#include <Logging.h>
 
 #include "Board.h"
 
@@ -85,8 +86,15 @@ public:
      */
     bool begin()
     {
-        m_strip.Begin();
-        m_strip.Show();
+        m_tft.init();
+
+        m_tft.fillScreen(TFT_BLACK);
+        m_tft.setCursor(0, 0, 4);
+        m_tft.setTextColor(TFT_WHITE, TFT_BLACK);
+        m_tft.println("TFT ready.\n");
+        sleep(3U);
+
+        LOG_INFO("LedMatrix TFT is up.");
 
         return true;
     }
@@ -96,7 +104,7 @@ public:
      */
     void show()
     {
-        m_strip.Show();
+        //m_strip.Show();
         return;
     }
 
@@ -107,7 +115,8 @@ public:
      */
     bool isReady() const
     {
-        return m_strip.CanShow();
+        return true;
+        //return m_strip.CanShow();
     }
 
     /**
@@ -119,12 +128,12 @@ public:
     {
         /* To protect the the electronic parts, the brigntness will be scaled down
          * according to the max. supply current.
-         */
         const uint8_t SAFE_BRIGHTNESS =
             (Board::LedMatrix::supplyCurrentMax * brightness) /
             (Board::LedMatrix::maxCurrentPerLed * Board::LedMatrix::width *Board::LedMatrix::height);
 
         m_strip.SetBrightness(SAFE_BRIGHTNESS);
+         */
         return;
     }
 
@@ -133,7 +142,8 @@ public:
      */
     void clear()
     {
-        m_strip.ClearTo(ColorDef::BLACK);
+        //m_strip.ClearTo(ColorDef::BLACK);
+        m_tft.fillScreen(TFT_BLACK);
         return;
     }
 
@@ -153,7 +163,7 @@ private:
     TFT_eSPI                                                m_tft;
 
     /** Panel topology, used to map coordinates to the framebuffer. */
-    NeoTopology<ColumnMajorAlternatingLayout>               m_topo;
+    //NeoTopology<ColumnMajorAlternatingLayout>               m_topo;
 
     /**
      * Construct LED matrix.
@@ -182,9 +192,8 @@ private:
             (0 <= y) &&
             (Board::LedMatrix::height > y))
         {
-            HtmlColor htmlColor = static_cast<uint32_t>(color);
-
-            m_strip.SetPixelColor(m_topo.Map(x, y), htmlColor);
+            m_tft.fillRect(( y*7U ) + 39 , (TFT_HEIGHT - (x*7U) ) - 8, 6U, 6U, color);
+            //m_strip.SetPixelColor(m_topo.Map(x, y), htmlColor);
         }
 
         return;
@@ -207,9 +216,9 @@ private:
             (0 <= y) &&
             (Board::LedMatrix::height > y))
         {
-            RgbColor rgbColor = m_strip.GetPixelColor(m_topo.Map(x, y)).Dim(UINT8_MAX - ratio);
+            //RgbColor rgbColor = m_strip.GetPixelColor(m_topo.Map(x, y)).Dim(UINT8_MAX - ratio);
 
-            m_strip.SetPixelColor(m_topo.Map(x, y), rgbColor);
+            //m_strip.SetPixelColor(m_topo.Map(x, y), rgbColor);
         }
 
         return;

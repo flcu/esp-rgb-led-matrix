@@ -69,7 +69,8 @@
  *****************************************************************************/
 
 LedMatrix::LedMatrix() :
-    IGfx(Board::LedMatrix::width, Board::LedMatrix::height)
+    IGfx(Board::LedMatrix::width, Board::LedMatrix::height),
+    m_ledMatrix( { { ColorDef::BLACK } } )
     //m_strip(Board::LedMatrix::width * Board::LedMatrix::height, Board::Pin::ledMatrixDataOutPinNo),
     //m_topo(Board::LedMatrix::width, Board::LedMatrix::height)
 {
@@ -84,7 +85,7 @@ Color LedMatrix::getColor(int16_t x, int16_t y) const
 {
     //HtmlColor htmlColor = m_strip.GetPixelColor(m_topo.Map(x, y));
 
-    return Color(128U,255U,255U);
+    return m_ledMatrix[x][y];
 }
 
 /******************************************************************************

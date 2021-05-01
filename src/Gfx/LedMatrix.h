@@ -93,7 +93,6 @@ public:
         m_tft.setTextColor(TFT_WHITE, TFT_BLACK);
         m_tft.println("TFT ready.\n");
         sleep(3U);
-
         LOG_INFO("LedMatrix TFT is up.");
 
         return true;
@@ -104,7 +103,16 @@ public:
      */
     void show()
     {
-        //m_strip.Show();
+        int16_t x,y = 0;
+        
+        for ( x = 0; Board::LedMatrix::width > x ; x++ )
+        {
+            for ( y = 0; Board::LedMatrix::height > y ; y++ )
+            {
+                m_tft.fillRect(( y*7U ) + 39 , (TFT_HEIGHT - (x*7U) ) - 8, 6U, 6U, m_ledMatrix[x][y].to565() );
+            }
+
+        }
         return;
     }
 
@@ -144,6 +152,14 @@ public:
     {
         //m_strip.ClearTo(ColorDef::BLACK);
         m_tft.fillScreen(TFT_BLACK);
+        for ( int16_t x = 0; Board::LedMatrix::width > x ; x++ )
+        {
+            for ( int16_t y = 0; Board::LedMatrix::height > y ; y++ )
+            {
+                m_ledMatrix[x][y] = ColorDef::BLACK;
+            }
+        }
+
         return;
     }
 
@@ -161,6 +177,7 @@ private:
 
     /** Pixel representation of the LED matrix */
     TFT_eSPI                                                m_tft;
+    Color                                                   m_ledMatrix[Board::LedMatrix::width][Board::LedMatrix::height];
 
     /** Panel topology, used to map coordinates to the framebuffer. */
     //NeoTopology<ColumnMajorAlternatingLayout>               m_topo;
@@ -192,8 +209,9 @@ private:
             (0 <= y) &&
             (Board::LedMatrix::height > y))
         {
-            m_tft.fillRect(( y*7U ) + 39 , (TFT_HEIGHT - (x*7U) ) - 8, 6U, 6U, color);
+            //m_tft.fillRect(( y*7U ) + 39 , (TFT_HEIGHT - (x*7U) ) - 8, 6U, 6U, color);
             //m_strip.SetPixelColor(m_topo.Map(x, y), htmlColor);
+            m_ledMatrix[x][y] = color;
         }
 
         return;
@@ -216,7 +234,7 @@ private:
             (0 <= y) &&
             (Board::LedMatrix::height > y))
         {
-            //RgbColor rgbColor = m_strip.GetPixelColor(m_topo.Map(x, y)).Dim(UINT8_MAX - ratio);
+            //RgbColor rgbColor = m_ledMatrix[x][y].Dim(UINT8_MAX - ratio);
 
             //m_strip.SetPixelColor(m_topo.Map(x, y), rgbColor);
         }

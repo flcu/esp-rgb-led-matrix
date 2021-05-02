@@ -68,19 +68,19 @@ namespace Pin
     static const uint8_t    onBoardLedPinNo         = 2U;
 
     /** Pin number of user button */
-    static const uint8_t    userButtonPinNo         = 35U;
+    static const uint8_t    userButtonPinNo         = 35U; // this works - 2.5.2021
 
     /** Pin number of test pin */
     static const uint8_t    testPinNo               = 23U;
 
     /** Pin number of LED matrix data out */
-    static const uint8_t    ledMatrixDataOutPinNo   = 27U;
+    static const uint8_t    ledMatrixDataOutPinNo   = 37U; 
 
     /** Pin number of LDR in */
-    static const uint8_t    ldrInPinNo              = 27U;
+    static const uint8_t    ldrInPinNo              = 32U; // this also works - 2.5.2021
 
     /** Pin number of dht sensor in */
-    static const uint8_t    dhtInPinNo              = 37U;
+    static const uint8_t    dhtInPinNo              = 27U; // this works - 2.5.2021
 };
 
 /** Digital output pin: Onboard LED */

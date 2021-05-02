@@ -216,7 +216,12 @@ void TempHumidPlugin::process()
                 m_temp  = temperature;
                 m_last = msSinceInit;
                 LOG_INFO("got new temp %lu h: %f, t: %f", m_last, m_humid, m_temp);
+            } 
+            else if ( 0 == (msSinceInit % 100U) ) 
+            {
+                LOG_INFO("temp reading c: %lu, l: %lu h: %f, t: %f", msSinceInit, m_last, m_humid, m_temp);
             }
+
     }
 }
 

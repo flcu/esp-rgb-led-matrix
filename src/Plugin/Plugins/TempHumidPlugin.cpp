@@ -37,7 +37,13 @@
 
 #include <Board.h>
 #include <Color.h>
+#ifdef CONFIG_TEMPHUMID_DHTSENSOR
 #include <DHTesp.h>
+#endif
+#ifdef CONFIG_TEMPHUMID_SHTSENSOR
+#include <Wire.h>
+#include <SHTSensor.h>
+#endif
 #include <Logging.h>
 
 /******************************************************************************
@@ -201,14 +207,33 @@ void TempHumidPlugin::update(IGfx& gfx)
 void TempHumidPlugin::process() 
 {
     unsigned long msSinceInit=millis();
-    float humidity;
-    float temperature;
+    float humidity, temperature = -99.0F;
 
-    /* read only if update_period not reached or sensor has never been read */
-    if ( ( msSinceInit > ( m_last + SENSOR_UPDATE_PERIOD ) )  || ( 0U == m_last ) )
+    /* read only if update_period not reached. If sensor has never been read, try every 1000ms */
+    if ( ( ( 0U != m_last ) && ( msSinceInit > ( m_last + SENSOR_UPDATE_PERIOD ) ) )  || ( ( 0U == m_last ) && ( 0 == msSinceInit % 1000 ) ) )
     {
-            humidity = m_dht.getTemperature();
-            temperature = m_dht.getHumidity();
+            #ifdef CONFIG_TEMPHUMID_DHTSENSOR
+            temperature = m_dht.getTemperature();
+            humidity = m_dht.getHumidity();
+            #endif
+
+            #ifdef CONFIG_TEMPHUMID_SHTSENSOR
+            LOG_INFO("trying to read c: %lu, l: %lu", msSinceInit, m_last);
+            m_sht.read();
+            temperature = m_sht.getTemperature();
+            humidity = m_sht.getHumidity();
+            /*
+            if (m_sht.readSample())
+            {
+                temperature = m_sht.getTemperature();
+                humidity = m_sht.getHumidity();
+            } 
+            else 
+            {
+                LOG_INFO("sht - unable to readSample!");
+            }
+            */
+            #endif
             /* only accept if both values could be read */
             if ( !isnan(humidity) && !isnan(temperature) ) 
             {
@@ -216,18 +241,29 @@ void TempHumidPlugin::process()
                 m_temp  = temperature;
                 m_last = msSinceInit;
                 LOG_INFO("got new temp %lu h: %f, t: %f", m_last, m_humid, m_temp);
-            } 
-            else if ( 0 == (msSinceInit % 100U) ) 
-            {
-                LOG_INFO("temp reading c: %lu, l: %lu h: %f, t: %f", msSinceInit, m_last, m_humid, m_temp);
-            }
-
+            }             
     }
 }
 
 void TempHumidPlugin::start()
 {
+    #ifdef CONFIG_TEMPHUMID_DHTSENSOR
     m_dht.setup(Board::Pin::dhtInPinNo, DHTTYPE);
+    LOG_INFO("DHT Sensor started.");
+    #endif
+    #ifdef CONFIG_TEMPHUMID_SHTSENSOR
+    Wire.begin();
+    if ( m_sht.begin(0x44) ) {
+        LOG_INFO("Initialized SHT Measurement.", m_sht.readStatus());
+    } 
+    else
+    {
+        LOG_INFO("ERROR initializing SHT Measurement.");
+    }
+    #endif
+    #if !defined(CONFIG_TEMPHUMID_DHTSENSOR) && !defined(CONFIG_TEMPHUMID_SHTSENSOR)
+    LOG_INFO("no sensor defined");
+    #endif    
     return;
 }
 

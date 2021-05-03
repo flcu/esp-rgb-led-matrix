@@ -45,10 +45,15 @@
  *****************************************************************************/
 #include <stdint.h>
 #include "Plugin.hpp"
-
+#ifdef CONFIG_TEMPHUMID_DHTSENSOR
 #include <DHTesp.h>
-#include <SimpleTimer.hpp>
+#endif
+#ifdef CONFIG_TEMPHUMID_SHTSENSOR
+#include <Wire.h>
+#include <SHT31.h>
+#endif
 
+#include <SimpleTimer.hpp>
 #include <Canvas.h>
 #include <BitmapWidget.h>
 #include <TextWidget.h>
@@ -90,11 +95,16 @@ public:
         m_pageTime(10000U),
         m_timer(),
         m_xMutex(nullptr),
+        #ifdef CONFIG_TEMPHUMID_DHTSENSOR
         m_dht(),
+        #endif
+        #ifdef CONFIG_TEMPHUMID_SHTSENSOR
+        m_sht(),
+        #endif                 
         m_humid(0.0F),
         m_temp(0.0F),
         m_last(0U),
-        m_slotInterf(nullptr)
+        m_slotInterf(nullptr) 
     {
         /* Move the text widget one line lower for better look. */
         m_textWidget.move(0, 1);
@@ -221,7 +231,12 @@ private:
     unsigned long               m_pageTime;                 /**< How long to show page (1/4 slot-time or 10s default). */    
     SimpleTimer                 m_timer;                    /**< Timer for changing page. */
     SemaphoreHandle_t           m_xMutex;                   /**< Mutex to protect against concurrent access. */
+    #ifdef CONFIG_TEMPHUMID_DHTSENSOR
     DHTesp                      m_dht;                      /**< Sensor object */
+    #endif    
+    #ifdef CONFIG_TEMPHUMID_SHTSENSOR
+    SHT31                       m_sht;                      /**< Sensor object */
+    #endif    
     float                       m_humid;                    /**< Last sensor humidity value */
     float                       m_temp;                     /**< Last sensor temperature value */
     unsigned long               m_last;                     /**< Last sensor read timestamp */
